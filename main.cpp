@@ -53,14 +53,8 @@ int main()
         WS2812::FORMAT_GRB // Pixel format used by the LED strip
     );
 
-    // initialize buzzer
-    note_timer_struct noteTimer;
-    // Tell GPIO 20
-    gpio_set_function(BUZZER_PIN, GPIO_FUNC_PWM);
-    // Find out which PWM slice is connected to GPIO 0 (it's slice 0)
-    uint slice_num = pwm_gpio_to_slice_num(BUZZER_PIN);
-    noteTimer.slice_num = slice_num;
-
+    Buzzer buzzer(BUZZER_PIN);
+    
     // this turns the oldschool LED on
     gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, GPIO_OUT);
@@ -118,79 +112,71 @@ int main()
             }
         }
 
-        // ADC stuff
-        uint32_t result = potentiometer.Read(); // get adc value
-        if (result < deadzone)                  // check if in deadzone
-        {
-            result = 0;
-        }
-        float V = result * conversion_factor_V; // convert to V
+        // // ADC stuff
+        // uint32_t result = potentiometer.Read(); // get adc value
+        // if (result < deadzone)                  // check if in deadzone
+        // {
+        //     result = 0;
+        // }
+        // float V = result * conversion_factor_V; // convert to V
 
-        // converting result to displayable format
-        char charV[10];
-        snprintf(charV, sizeof charV, "%f", V);
+        // // converting result to displayable format
+        // char charV[10];
+        // snprintf(charV, sizeof charV, "%f", V);
+        // display.clear();
+        // for (int i = 0; i < 6; i++)
+        //     drawChar(&display, font_12x16, charV[i], 0 + 12 * i, 0);
+        // drawText(&display, font_12x16, "Group 7", 16, 44);
+        // display.sendBuffer();
+        // sleep_ms(1);
+
+        buzzer.playMelody(DoomMelody);
+
         display.clear();
-        for (int i = 0; i < 6; i++)
-            drawChar(&display, font_12x16, charV[i], 0 + 12 * i, 0);
+        drawText(&display, font_5x8, "now playing...", 0, 0);
+        drawText(&display, font_16x32, "DOOM", 32, 10);
         drawText(&display, font_12x16, "Group 7", 16, 44);
         display.sendBuffer();
-        sleep_ms(1);
 
-        // play_melody(&noteTimer, DoomMelody, 225);
+        ledStrip.fill(WS2812::RGB(255, 0, 0));
+        ledStrip.show();
 
-        // display.clear();
-        // drawText(&display, font_5x8, "now playing...", 0, 0);
-        // drawText(&display, font_16x32, "DOOM", 32, 10);
-        // drawText(&display, font_12x16, "Group 7", 16, 44);
-        // display.sendBuffer();
+        while (!buzzer.isDone()) {
+            if (input_a.is_pressed())
+            {
+                gpio_put(LED_PIN, true);
+                buzzer.stopMelody();
+                sleep_ms(10);
+                gpio_put(LED_PIN, false);
+                break;
+            }
+        }
+        
+        buzzer.playMelody(BreezeMelody);
 
-        // gpio_put(LED_PIN, true);
-        // ledStrip.fill(WS2812::RGB(255, 0, 0));
-        // ledStrip.show();
+        display.clear();
+        drawText(&display, font_5x8, "now playing...", 0, 0);
+        drawText(&display, font_5x8, "chirp up", 0, 10);
+        drawText(&display, font_12x16, "Group 7", 16, 44);
+        display.sendBuffer();
 
-        // while (!noteTimer.Done);
+        ledStrip.fill(WS2812::RGB(255, 0, 255));
+        ledStrip.show();
 
-        // play_melody(&noteTimer, ChirpUp, 225);
+        while (!buzzer.isDone());
+        
+        // pause
+        display.clear();
+        drawText(&display, font_5x8, "now playing...", 0, 0);
+        drawText(&display, font_5x8, "nothing, go to bed", 0, 10);
+        drawText(&display, font_12x16, "Group 7", 16, 44);
+        display.sendBuffer();
 
-        // display.clear();
-        // drawText(&display, font_5x8, "now playing...", 0, 0);
-        // drawText(&display, font_5x8, "chirp up", 0, 10);
-        // drawText(&display, font_12x16, "Group 7", 16, 44);
-        // display.sendBuffer();
+        gpio_put(LED_PIN, false);
+        ledStrip.fill(WS2812::RGB(255, 0, 255));
+        ledStrip.show();
 
-        // gpio_put(LED_PIN, false);
-        // ledStrip.fill(WS2812::RGB(255, 0, 255));
-        // ledStrip.show();
-
-        // while (!noteTimer.Done);
-
-        // play_melody(&noteTimer, NokiaRingtone, 180);
-
-        // display.clear();
-        // drawText(&display, font_5x8, "now playing...", 0, 0);
-        // drawText(&display, font_5x8, "freakbob's ringtone lmao", 0, 10);
-        // drawText(&display, font_12x16, "Group 7", 16, 44);
-        // display.sendBuffer();
-
-        // gpio_put(LED_PIN, false);
-        // ledStrip.fill(WS2812::RGB(0, 0, 255));
-        // ledStrip.show();
-
-        // while (!noteTimer.Done);
-
-        // play_melody(&noteTimer, ChirpDown, 225);
-
-        // display.clear();
-        // drawText(&display, font_5x8, "now playing...", 0, 0);
-        // drawText(&display, font_5x8, "chirp down", 0, 10);
-        // drawText(&display, font_12x16, "Group 7", 16, 44);
-        // display.sendBuffer();
-
-        // gpio_put(LED_PIN, false);
-        // ledStrip.fill(WS2812::RGB(255, 0, 255));
-        // ledStrip.show();
-
-        // while (!noteTimer.Done);
+        sleep_ms(1000 * 10);
     }
 
     cyw43_arch_deinit();
