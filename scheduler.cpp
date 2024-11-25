@@ -17,44 +17,72 @@
 #define BUTTON_PIN 10
 #define BUZZER_PIN 20
 
-class Scheduler
-{
+class Scheduler {
 private:
     WS2812 ledStrip;
     Buzzer buzzer;
     Button button;
     pico_ssd1306::SSD1306 display;
 
+    void UpdateDisplay(const char* title,
+        const char* line1 = "",
+        const char* line2 = "",
+        const char* line3 = "",
+        const char* line4 = "")
+    {
+        display.clear();
+        display.setOrientation(0);
+        drawText(&display, font_12x16, title, 0, 0);
+        if (line1) drawText(&display, font_5x8, line1, 0, 16);
+        if (line2) drawText(&display, font_5x8, line2, 0, 26);
+        if (line3) drawText(&display, font_5x8, line3, 0, 36);
+        if (line4) drawText(&display, font_5x8, line4, 0, 46);
+        drawText(&display, font_5x8, "Group 7", 46, 56);
+        display.sendBuffer();
+    }
+
+    void WaitForButtonPress(int timeout_ms = -1)
+    {
+        int elapsed = 0;
+        while (timeout_ms == -1 || elapsed < timeout_ms)
+        {
+            sleep_ms(1);
+            elapsed++;
+            if (buttonPressed()) break;
+        }
+    }
+
+    void ActivateLED(uint32_t color)
+    {
+        ledStrip.fill(color);
+        ledStrip.show();
+    }
+
+    void ClearLEDAndDisplay()
+    {
+        ledStrip.fill(WS2812::RGB(0, 0, 0));
+        ledStrip.show();
+        display.clear();
+        display.sendBuffer();
+    }
+
 public:
     Scheduler() : ledStrip(RGBLED_PIN, RGBLED_LENGTH, pio0, 0, WS2812::FORMAT_GRB),
                   buzzer(BUZZER_PIN),
                   button(BUTTON_PIN),
-                  display(i2c_default, 0x3C, pico_ssd1306::Size::W128xH64)
-    {
-        // Init LED on pin 7
+                  display(i2c_default, 0x3C, pico_ssd1306::Size::W128xH64) {
         gpio_init(LED_PIN);
         gpio_set_dir(LED_PIN, GPIO_OUT);
         gpio_pull_up(LED_PIN);
-
-        // Set display orientation so it's not flipped
-        display.setOrientation(0);
-
         cyw43_arch_enable_sta_mode();
-        absolute_time_t scan_time = nil_time;
-        bool scan_in_progress = false;
-
-        printf("Scheduler constructed\n");
+        printf("Scheduler initialized\n");
     }
 
-    // Main loop
     void run()
     {
         printf("Scheduler running\n");
 
-        int position = 9999;    // Example placeholder
-        char alarmMelody = 'D'; // Example placeholder
-        char username[] = "Ronaldinho"; // Example placeholder
-
+        char username[] = "Ronaldinho";
         while (true)
         {
             ActivateConnectionError();
@@ -65,7 +93,7 @@ public:
             sleep_ms(10000);
             ActivatePreAlarm();
             sleep_ms(10000);
-            ActivateAlarm(position, alarmMelody);
+            ActivateAlarm(1234, 'K');
             sleep_ms(10000);
             ActivateLogout();
             sleep_ms(10000);
@@ -84,193 +112,124 @@ public:
         return false;
     }
 
-    inline void ActivateConnectionError()
+    void ActivateConnectionError()
     {
-        display.clear();
-        drawText(&display, font_12x16, "Conn.Error", 0, 0);
-        drawText(&display, font_5x8, "Cannot connect to app", 0, 18);
-        drawText(&display, font_5x8, "Resolve error to proceed", 0, 38);
-        drawText(&display, font_5x8, "Group 7", 46, 56);
-        display.sendBuffer();
-
-        int brightness = 0;
-        bool fadeOut = false;
-        while (true)
-        {
-            if (!brightness)
-                fadeOut = false;
-            else if (brightness > 128)
-                fadeOut = true;
-            if (fadeOut)
-                brightness--;
-            else
-                brightness++;
-            
-            ledStrip.fill(WS2812::RGB(0, 0, brightness));
-            ledStrip.show();
-            sleep_ms(5);
-            // TODO: this is where we should check for status
-            // for now, just use button to close the warning
-            if (buttonPressed()) break;
-        }
-
-        // Clear display
-        display.clear();
-        display.sendBuffer();
-        ledStrip.fill(WS2812::RGB(0, 0, 0));
-        ledStrip.show();
-    }
-
-    inline void ActivateDeskError()
-    {
-        ledStrip.fill(WS2812::RGB(255, 0, 0));
-        ledStrip.show();
-
-        display.clear();
-        drawText(&display, font_12x16, "Desk Error", 0, 0);
-        drawText(&display, font_5x8, "Desk returning error code", 0, 18);
-        drawText(&display, font_5x8, "Resolve error to proceed", 0, 38);
-        drawText(&display, font_5x8, "Group 7", 46, 56);
-        display.sendBuffer();
-
-        while (true)
-        {
-            sleep_ms(1);
-            // TODO: this is where we should check for status
-            // for now, just use button to close the warning
-            if (buttonPressed()) break;
-        }
-
-        // Clear display
-        display.clear();
-        display.sendBuffer();
-        ledStrip.fill(WS2812::RGB(0, 0, 0));
-        ledStrip.show();
-    }
-
-    inline void ActivateLogin(char username[], int seconds = 10)
-    {
-        display.clear();
-        drawText(&display, font_12x16, "Welcome", 16, 0);
-        drawText(&display, font_5x8, "Logged in as", 0, 18);
-
-        for (int i = 0; i < 10; i++)
-            drawChar(&display, font_5x8, username[i], 65 + 5 * i, 18);
-
-        drawText(&display, font_5x8, "Press button to dismiss", 0, 38);
-        drawText(&display, font_5x8, "Group 7", 46, 56);
-        display.sendBuffer();
-
-        for (int i = 0; i < (1000 * seconds); i++)
-        {
-            sleep_ms(1);
-            if (buttonPressed()) break;
-        }
-
-        // Clear display
-        display.clear();
-        display.sendBuffer();
-    }
-
-    inline void ActivateLogout(int seconds = 10)
-    {
-        display.clear();
-        drawText(&display, font_12x16, "Logging out", 0, 0);
-        drawText(&display, font_5x8, "Have a nice day!", 16, 18);
-        drawText(&display, font_5x8, "Press button to dismiss", 0, 38);
-        drawText(&display, font_5x8, "Group 7", 46, 56);
-        display.sendBuffer();
-
-        for (int i = 0; i < (1000 * seconds); i++)
-        {
-            sleep_ms(1);
-            if (buttonPressed()) break;
-        }
-
-        // Clear display
-        display.clear();
-        display.sendBuffer();
-    }
-
-    inline void ActivatePreAlarm(int seconds = 10)
-    {
-        ledStrip.fill(WS2812::RGB(255, 255, 0));
-        ledStrip.show();
-
-        display.clear();
-        drawText(&display, font_12x16, "Warning", 16, 0);
-        drawText(&display, font_5x8, "Desk alarm will play soon", 0, 18);
-        drawText(&display, font_5x8, "Press button to dismiss", 0, 38);
-        drawText(&display, font_5x8, "Group 7", 46, 56);
-        display.sendBuffer();
-
-        for (int i = 0; i < (1000 * seconds); i++)
-        {
-            sleep_ms(1);
-            if (buttonPressed()) break;
-        }
+        UpdateDisplay("Conn.Error", "", "Cannot connect to app", "Resolve error to proceed");
         
-        // Clear display and LED strip
-        display.clear();
-        display.sendBuffer();
-        ledStrip.fill(WS2812::RGB(0, 0, 0));
-        ledStrip.show();
+        int brightness = 0;
+        int step = 1; // Controls whether we fade in or out
+
+        while (true)
+        {
+            brightness += step;
+            // Reverse direction at bounds
+            if (brightness <= 0 || brightness >= 128) step = -step; 
+
+            ActivateLED(WS2812::RGB(0, 0, brightness)); // Blue pulse
+            sleep_ms(5);
+
+            // TODO: wait until error is resolved before proceeding.
+            // For now just cancel the warning by button press
+            if (buttonPressed()) break;
+        }
+        ClearLEDAndDisplay();
     }
 
-    // Handles logic for alarm sound and display
-    inline void ActivateAlarm(int position, char alarmMelody)
+    void ActivateDeskError()
     {
-        ledStrip.fill(WS2812::RGB(0, 255, 0));
-        ledStrip.show();
+        UpdateDisplay("Desk Error", "", "Desk returning error code", "Resolve error to proceed");
+        ActivateLED(WS2812::RGB(128, 0, 0)); // Red
+        WaitForButtonPress(); // TODO: change with error checking
+        ClearLEDAndDisplay();
+    }
 
-        display.clear();
-        drawText(&display, font_12x16, "Desk Alarm", 3, 0);
-        drawText(&display, font_5x8, "Changing position to", 0, 18);
+    void ActivateLogin(const char* username, int seconds = 10)
+    {
+        char userMsg[50];
+        snprintf(userMsg, sizeof(userMsg), "Logged in as %s", username);
+        UpdateDisplay("Welcome", "", userMsg, "Press button to dismiss");
+        WaitForButtonPress(seconds * 1000);
+        ClearLEDAndDisplay();
+    }
 
-        char charpos[5];
-        snprintf(charpos, sizeof charpos, "%d", position);
-        for (int i = 0; i < 4; i++)
-            drawChar(&display, font_5x8, charpos[i], 105 + 5 * i, 18);
+    void ActivateLogout(int seconds = 10)
+    {
+        UpdateDisplay("Logging out", "", "Have a nice day!", "Press button to dismiss");
+        WaitForButtonPress(seconds * 1000);
+        ClearLEDAndDisplay();
+    }
 
-        drawText(&display, font_5x8, "Playing:", 0, 28);
+    void ActivatePreAlarm(int seconds = 10)
+    {
+        UpdateDisplay("Warning", "", "Desk alarm will play soon", "Press button to dismiss");
+        ActivateLED(WS2812::RGB(128, 128, 0)); // Yellow
+        WaitForButtonPress(seconds * 1000);
+        ClearLEDAndDisplay();
+    }
 
-        // TODO: add support for more alarms, or redo how they're passed
+    void ActivateAlarm(int position, char alarmMelody)
+    {
+        char positionMsg[50];
+        snprintf(positionMsg, sizeof(positionMsg), "Changing position to %d", position);
+
+        const char* melodyName;
         switch (alarmMelody)
         {
+        case 'B':
+            melodyName = "Beep";
+            buzzer.playMelody(BeepMelody);
+            break;
+        case 'E':
+            melodyName = "Breeze";
+            buzzer.playMelody(BreezeMelody);
+            break;
+        case 'M':
+            melodyName = "Brrr";
+            buzzer.playMelody(RumbleMelody);
+            break;
+        case 'Z':
+            melodyName = "Bzzz";
+            buzzer.playMelody(BzzzMelody);
+            break;
         case 'D':
-            drawText(&display, font_5x8, "DOOM", 45, 28);
+            melodyName = "DOOM";
             buzzer.playMelody(DoomMelody);
             break;
         case 'R':
-            drawText(&display, font_5x8, "Rick Roll", 45, 28);
+            melodyName = "Rick Roll";
             buzzer.playMelody(RickRollMelody);
             break;
+        case 'N':
+            melodyName = "Nokia ringtone";
+            buzzer.playMelody(NokiaMelody);
+            break;
+        case 'K':
+            melodyName = "Krusty Krab";
+            buzzer.playMelody(KrabMelody);
+            break;
+        case 'P':
+            melodyName = "Pink Panther";
+            buzzer.playMelody(PinkPantherMelody);
+            break;
         default:
-            drawText(&display, font_5x8, "None", 45, 28);
+            melodyName = "None";
             break;
         }
 
-        drawText(&display, font_5x8, "Press btn to stop sound", 0, 38);
-        drawText(&display, font_5x8, "Group 7", 46, 56);
-        display.sendBuffer();
+        char melodyMsg[50];
+        snprintf(melodyMsg, sizeof(melodyMsg), "Playing: %s", melodyName);
 
-        // Wait for melody to finish or button press
+        UpdateDisplay("Desk Alarm", positionMsg, melodyMsg, "Press button to dismiss");
+        ActivateLED(WS2812::RGB(0, 128, 0)); // Green
+
+        
         while (!buzzer.isDone())
-        {
             if (buttonPressed()) break;
-        }
-
         buzzer.stopMelody();
-        // Clear display and LED strip
-        display.clear();
-        display.sendBuffer();
-        ledStrip.fill(WS2812::RGB(0, 0, 0));
-        ledStrip.show();
+        ClearLEDAndDisplay();
     }
 
-    ~Scheduler()
-    {
-    }
+    ~Scheduler() {}
 };
 
 int main()
@@ -286,13 +245,6 @@ int main()
 
     // Set default baudrate for i2c display
     uint baudrate = 800000;
-
-    // Uncomment to allow calibrating baudrate using potmeter
-    // ADC potentiometer(0, true);
-    // uint32_t result = potentiometer.Read();
-    // if (result < deadzone)
-    //     result = 0;
-    // baudrate = result * 250;
 
     // Init i2c0 controller for display
     i2c_init(i2c_default, baudrate);
