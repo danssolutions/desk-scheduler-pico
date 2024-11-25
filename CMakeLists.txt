@@ -29,7 +29,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(scheduler scheduler.cpp buzzer.cpp button.cpp WS2812.cpp)
+add_executable(scheduler scheduler.cpp buzzer.cpp button.cpp wifi.cpp WS2812.cpp)
 
 pico_generate_pio_header(scheduler ${CMAKE_CURRENT_LIST_DIR}/WS2812.pio)
 
@@ -51,9 +51,15 @@ target_include_directories(scheduler PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/.. # for our common lwipopts or any other standard includes, if required
 )
 
+target_compile_definitions(scheduler PRIVATE
+  WIFI_SSID=\"${WIFI_SSID}\"
+  WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+)
+
 # Add any user requested libraries
 target_link_libraries(scheduler 
         hardware_i2c
+        hardware_rtc
         hardware_pio
         hardware_pwm
         hardware_adc
