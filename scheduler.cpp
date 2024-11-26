@@ -328,7 +328,7 @@ int main()
     }
 
     // Set default baudrate for i2c display
-    uint baudrate = 750000;
+    uint baudrate = 500000;
 
     // Init i2c0 controller for display
     i2c_init(i2c_default, baudrate);
