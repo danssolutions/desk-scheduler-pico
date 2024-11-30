@@ -12,6 +12,7 @@
 #include "button.h"
 #include "wifi.h"
 #include "rtc.h"
+#include "tcp_server.cpp"
 
 #define RGBLED_PIN 6
 #define RGBLED_LENGTH 6
@@ -145,9 +146,10 @@ public:
     {
         while (!wifiManager.connect())
         {
-            ActivateConnectionError();
+            ActivateConnectionError();   
         }
-
+        
+        run_tcp_server_test();
         printf("Scheduler running\n");
 
         char username[] = "Ronaldinho";
@@ -320,7 +322,6 @@ int main()
 {
     stdio_init_all();
     printf("Starting Desk Alarm System\n");
-
     if (cyw43_arch_init())
     {
         printf("failed to initialise\n");
@@ -329,7 +330,6 @@ int main()
 
     // Set default baudrate for i2c display
     uint baudrate = 500000;
-
     // Init i2c0 controller for display
     i2c_init(i2c_default, baudrate);
     // Set up pins
