@@ -94,6 +94,19 @@ enum NoteFreq : uint16_t
     DS8 = 4978
 };
 
+constexpr Note NoNotes[] = {
+    // A long pause with no sound. A slightly hacky way to make the alarm not deactivate instantly when set.
+    {NoteFreq::REST, 1},
+    {NoteFreq::REST, 1},
+    {NoteFreq::REST, 1},
+    {NoteFreq::REST, 1},
+    {NoteFreq::REST, 1},
+    {NoteFreq::REST, 1},
+    {NoteFreq::REST, 1},
+    {NoteFreq::REST, 1},
+    {NoteFreq::REST, 0}};
+constexpr Melody NoMelody = {NoNotes, 180};
+
 constexpr Note Beep[] = {
     // A single long tone
     {NoteFreq::D5, 1},
@@ -780,7 +793,6 @@ constexpr Melody NokiaMelody = {NokiaRingtone, 180};
 constexpr Note KrabNotes[] = {
     // Krusty Krab theme from Spongebob
     // https://musescore.com/user/7040741/scores/2683921
-    {NoteFreq::REST, 2},
     {NoteFreq::D5, 8},
     {NoteFreq::CS5, 8},
     {NoteFreq::C5, 8},
@@ -934,9 +946,7 @@ constexpr Note PinkPantherNotes[] = {
     // Pink Panther theme
     // Score available at https://musescore.com/benedictsong/the-pink-panther
     // Theme by Masato Nakamura, arranged by Teddy Mason
-    {NoteFreq::REST, 2},
-    {NoteFreq::REST, 4},
-    {NoteFreq::REST, 8},
+    {NoteFreq::REST, 1},
     {NoteFreq::DS4, 8},
     {NoteFreq::E4, -4},
     {NoteFreq::REST, 8},

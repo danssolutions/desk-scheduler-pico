@@ -39,7 +39,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(scheduler scheduler.cpp buzzer.cpp button.cpp wifi.cpp WS2812.cpp)
+add_executable(scheduler scheduler.cpp buzzer.cpp button.cpp WS2812.cpp)
 
 pico_generate_pio_header(scheduler ${CMAKE_CURRENT_LIST_DIR}/WS2812.pio)
 
