@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #include "hardware/rtc.h"
 #include "pico/util/datetime.h"
 #include "ntp.h"

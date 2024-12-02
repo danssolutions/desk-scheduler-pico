@@ -1,3 +1,6 @@
+// Based on code from:
+// https://forums.raspberrypi.com/viewtopic.php?t=310320#p1857472 (converted to C++ and OOP design)
+
 #include "buzzer.h"
 
 Buzzer::Buzzer(uint gpio) : pin(gpio)

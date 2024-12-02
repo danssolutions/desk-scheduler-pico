@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2022 Raspberry Pi (Trading) Ltd.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #include "lwip/dns.h"
 #include "lwip/pbuf.h"
 #include "lwip/udp.h"

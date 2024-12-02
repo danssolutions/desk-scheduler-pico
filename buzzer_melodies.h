@@ -201,6 +201,7 @@ constexpr Melody BzzzMelody = {Bzzz, 240};
 constexpr Note DoomNotes[] = {
     // At Doom's Gate (E1M1)
     // Score available at https://musescore.com/pieridot/doom
+    // Based on: https://github.com/robsoncouto/arduino-songs/blob/master/doom/doom.ino
     {NoteFreq::E2, 8},
     {NoteFreq::E2, 8},
     {NoteFreq::E3, 8},
@@ -456,6 +457,7 @@ constexpr Note RickRollNotes[] = {
     // Never Gonna Give You Up - Rick Astley
     // Score available at https://musescore.com/chlorondria_5/never-gonna-give-you-up_alto-sax
     // Arranged by Chlorondria
+    // Based on: https://github.com/robsoncouto/arduino-songs/blob/master/nevergonnagiveyouup/nevergonnagiveyouup.ino
     {NoteFreq::D5, -4},
     {NoteFreq::E5, -4},
     {NoteFreq::A4, 4},
@@ -774,6 +776,7 @@ constexpr Melody RickRollMelody = {RickRollNotes, 114};
 constexpr Note NokiaRingtone[] = {
     // Nokia Ringtone
     // Score available at https://musescore.com/user/29944637/scores/5266155
+    // Based on: https://github.com/robsoncouto/arduino-songs/blob/master/nokia/nokia.ino
     {NoteFreq::E5, 8},
     {NoteFreq::D5, 8},
     {NoteFreq::FS4, 4},
@@ -793,6 +796,7 @@ constexpr Melody NokiaMelody = {NokiaRingtone, 180};
 constexpr Note KrabNotes[] = {
     // Krusty Krab theme from Spongebob
     // https://musescore.com/user/7040741/scores/2683921
+    // Based on: https://github.com/qbx2/arduino-spongebob-krusty-krab-bgm
     {NoteFreq::D5, 8},
     {NoteFreq::CS5, 8},
     {NoteFreq::C5, 8},
@@ -946,6 +950,7 @@ constexpr Note PinkPantherNotes[] = {
     // Pink Panther theme
     // Score available at https://musescore.com/benedictsong/the-pink-panther
     // Theme by Masato Nakamura, arranged by Teddy Mason
+    // Based on: https://github.com/robsoncouto/arduino-songs/blob/master/pinkpanther/pinkpanther.ino
     {NoteFreq::REST, 1},
     {NoteFreq::DS4, 8},
     {NoteFreq::E4, -4},
